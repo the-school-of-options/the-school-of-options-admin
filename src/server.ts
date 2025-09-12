@@ -1,90 +1,58 @@
-import AdminJS from "adminjs";
-import AdminJSExpress from "@adminjs/express";
-import { Database, Resource } from "@adminjs/mongoose";
 import express from "express";
 import path from "path";
-import { fileURLToPath } from "url";
 import dotenv from "dotenv";
-import { adminOptions } from "./config/admin.config.js";
-import { connectDB } from "./config/database.js";
+import { initDB, AppDataSource } from "./config/database.js";
+import { RegisterAdminJS } from "./config/admin.config.js";
 
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// --- AdminJS Setup ---
 async function setupAdmin(port: number) {
-  AdminJS.registerAdapter({ Database, Resource });
+  try {
+    // Initialize database first
+    await initDB();
+    
+    // Wait a moment to ensure the connection is fully established
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Now create AdminJS with the initialized database
+    const { adminJs, router: adminJsRouter } = await RegisterAdminJS();
+    
+    const app = express();
+    const publicPath = path.resolve(process.cwd(), "public"); // Use process.cwd() instead of __dirname
+    console.log(`Serving static files from: ${publicPath}`);
+    app.use(express.static(publicPath));
 
-  const admin = new AdminJS(adminOptions);
+    app.use(adminJs.options.rootPath, adminJsRouter);
 
-  // if (process.env.NODE_ENV === "development") {
-  // }
-  admin.watch();
-  console.log("AdminJS is watching for component changes...");
+    app.get("/", (_, res) => {
+      res.send(`
+        <h1>The School of Options Admin Service</h1>
+        <p>Visit <a href="/admin">/admin</a> for the Admin Panel.</p>
+        <p>Login with email: hello@theschoolofoptions.com</p>
+        <hr>
+        <small>Authentication is enabled. You will be redirected to login if not authenticated.</small>
+      `);
+    });
 
-  const app = express();
-
-  const publicPath = path.resolve(__dirname, "../../public");
-  console.log(`Serving static files from: ${publicPath}`);
-  app.use(express.static(publicPath));
-
-  const adminRouter = AdminJSExpress.buildAuthenticatedRouter(admin, {
-    authenticate: async (email: string, password: string) => {
-      return {
-        email: "hello@theschoolofoptions.com",
-        role: "admin",
-        id: "admin-user",
-      };
-    },
-    cookiePassword: "ABbfibrirbOEUFBkbfrbHjahsj",
-    cookieName: "theschoolofoptions-admin-session",
-  });
-
-  app.use(admin.options.rootPath, adminRouter);
-
-  app.get("/", (_, res) => {
-    res.send(`
-            <h1>The School of Options Admin Service</h1>
-            <p>Visit <a href="/admin">/admin</a> for the Admin Panel.</p>
-            <p>Login with email: hello@theschoolofoptions.com</p>
-            <hr>
-            <small>Authentication is enabled. You will be redirected to login if not authenticated.</small>
-        `);
-  });
-
-  app.listen(port, () => {
-    console.log(
-      `AdminJS started on http://localhost:${port}${admin.options.rootPath}`
-    );
-    console.log(`Login with email: hello@theschoolofoptions.com`);
-  });
+    app.listen(port, () => {
+      console.log(
+        `AdminJS started on http://localhost:${port}${adminJs.options.rootPath}`
+      );
+      console.log(`Login with email: hello@theschoolofoptions.com`);
+    });
+  } catch (error) {
+    console.error("Failed to setup admin:", error);
+    process.exit(1);
+  }
 }
 
 async function start() {
-  // if (!process.env.MONGO_URI) {
-  //   console.error("MONGO_URI not found in .env file. Please add it.");
-  //   process.exit(1);
-  // }
-
-  // if (
-  //   !process.env.ADMIN_EMAIL ||
-  //   !process.env.ADMIN_PASSWORD ||
-  //   !process.env.SESSION_SECRET
-  // ) {
-  //   console.error(
-  //     "Authentication configuration missing. Please ensure ADMIN_EMAIL, ADMIN_PASSWORD, and SESSION_SECRET are set in .env file."
-  //   );
-  //   process.exit(1);
-  // }
-
-  const port = parseInt(process.env.PORT || "3001");
-
-  await connectDB(
-    "mongodb+srv://tech:w4k4qEYbgSA1jdHc@cluster0.mk4kiod.mongodb.net/school-of-options?retryWrites=true&w=majority&appName=Cluster0"
-  );
-  await setupAdmin(port);
+  try {
+    await setupAdmin(9000);
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
 }
 
 start();

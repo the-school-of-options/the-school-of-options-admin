@@ -1,111 +1,154 @@
-import { type AdminJSOptions, ComponentLoader } from "adminjs";
-import path from "path";
-import { fileURLToPath } from "url";
+import { Resource, Database } from "@adminjs/typeorm";
+import AdminJS, { AdminJSOptions } from "adminjs";
+import AdminJSExpress from "@adminjs/express";
+import { User } from "../entities/user.entity.js";
+import { Subscribers } from "../entities/subscriber.entity.js";
+import { AppDataSource } from "./database.js";
+import { Webinar } from "../entities/webinar.entity.js";
 
-import User from "../models/user.model.js";
-import Subscriber from "../models/subscriber.model.js";
-import TalkToUs from "../models/talktous.js";
-import Newsletter from "../models/newsletter.js";
-import Blog from "../models/blogs.js";
+export const RegisterAdminJS = async () => {
+  // Register the adapter BEFORE creating AdminJS instance
+  AdminJS.registerAdapter({ Database, Resource });
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+  // Ensure the database is initialized
+  if (!AppDataSource.isInitialized) {
+    await AppDataSource.initialize();
+  }
 
-// Register custom components
-const componentLoader = new ComponentLoader();
-const Components = {
-  RichTextEditor: componentLoader.add(
-    "RichTextEditor",
-    path.resolve(__dirname, "../admin/components/RichText.tsx")
-  ),
-};
-
-export const adminOptions: AdminJSOptions = {
-  rootPath: "/admin",
-  branding: {
-    companyName: "The School of Options",
-    withMadeWithLove: false,
-  },
-  componentLoader,
-  resources: [
-    {
-      resource: User,
-      options: {
-        // Top-level item (no accordion group) by omitting navigation
-        properties: {
-          password: { isVisible: false },
-          otp: { isVisible: { list: false, edit: false, show: false, filter: false } },
-          googleId: { isVisible: { list: false, edit: false, show: false, filter: false } },
-          isGoogleAcc: { isVisible: { list: false, edit: false, show: false, filter: false } },
-          __v: { isVisible: false },
-        },
-        actions: {
-          new: { isAccessible: true },
-          edit: { isAccessible: true },
-          delete: { isAccessible: true },
-        },
-      },
-    },
-    {
-      resource: Subscriber,
-      options: {
-        navigation: { name: "Engagement", icon: "Email" },
-        properties: { __v: { isVisible: false } },
-      },
-    },
-    {
-      resource: TalkToUs,
-      options: {
-        navigation: { name: "Engagement", icon: "ChatBubble" },
-        properties: { __v: { isVisible: false } },
-      },
-    },
-    {
-      resource: Newsletter,
-      options: {
-        navigation: { name: "Content", icon: "DocumentText" },
-        listProperties: ["title", "status", "updatedAt"],
-        showProperties: ["title", "content", "status", "createdAt", "updatedAt"],
-        properties: {
-          __v: { isVisible: false },
-          content: {
-            type: "richtext" as any,
-            components: {
-              edit: Components.RichTextEditor,
-              show: Components.RichTextEditor,
+  const adminJs = new AdminJS({
+    // Instead of databases, pass resources directly
+    resources: [
+      {
+        resource: User,
+        options: {
+          properties: {
+            // Hide OTP-related columns
+            otpCode: {
+              isVisible: {
+                list: false,
+                edit: false,
+                show: false,
+                filter: false,
+              },
             },
+            otpExpiresAt: {
+              isVisible: {
+                list: false,
+                edit: false,
+                show: false,
+                filter: false,
+              },
+            },
+            otpAttempts: {
+              isVisible: {
+                list: false,
+                edit: false,
+                show: false,
+                filter: false,
+              },
+            },
+            otpLastSentAt: {
+              isVisible: {
+                list: false,
+                edit: false,
+                show: false,
+                filter: false,
+              },
+            },
+            otpVerified: {
+              isVisible: {
+                list: false,
+                edit: false,
+                show: false,
+                filter: false,
+              },
+            },
+            otpType: {
+              isVisible: {
+                list: false,
+                edit: false,
+                show: false,
+                filter: false,
+              },
+            },
+            googleId: {
+              isVisible: {
+                list: false,
+                edit: false,
+                show: false,
+                filter: false,
+              },
+            },
+            isGoogleAcc: {
+              isVisible: {
+                list: false,
+                edit: false,
+                show: false,
+                filter: false,
+              },
+            },
+            cognitoId: {
+              isVisible: {
+                list: false,
+                edit: false,
+                show: false,
+                filter: false,
+              },
+            },
+          },
+          actions: {
+            new: { isAccessible: true },
+            edit: { isAccessible: true },
+            delete: { isAccessible: true },
           },
         },
       },
+      {
+        resource: Subscribers,
+      },
+      {
+        resource: Webinar,
+      },
+    ],
+    branding: {
+      companyName: "The School of Options",
+      logo: "/logo.png",
+      withMadeWithLove: false,
     },
-    {
-      resource: Blog,
-      options: {
-        navigation: { name: "Content", icon: "Document" },
-        listProperties: ["title", "slug", "status", "readingTime", "updatedAt"],
-        showProperties: [
-          "title",
-          "slug",
-          "displayPicture",
-          "content",
-          "status",
-          "readingTime",
-          "createdAt",
-          "updatedAt",
-        ],
-        properties: {
-          __v: { isVisible: false },
-          content: {
-            type: "richtext" as any,
-            components: {
-              edit: Components.RichTextEditor,
-              show: Components.RichTextEditor,
-            },
-          },
-          slug: { isDisabled: true },
-          readingTime: { isDisabled: true },
-        },
+    assets: {
+      styles: ["/custom-admin-styles.css"],
+    },
+    theme: {
+      colors: {
+        primary100: "#1e4356",
+        primary80: "#2b6078",
+        primary60: "#397c9a",
+        primary40: "#4fa6d5",
+        primary20: "#73bde3",
+        accent: "#4fa6d5",
+        filterBg: "#f8f9fa",
+        hoverBg: "#e2e6ea",
       },
     },
-  ],
+    rootPath: "/admin",
+  } as AdminJSOptions);
+
+  const router = AdminJSExpress.buildAuthenticatedRouter(adminJs, {
+    authenticate: async (email: string, password: string) => {
+      void password;
+      if (email === "tech@atomclass.com") {
+        return {
+          email: "tech@atomclass.com",
+          role: "admin",
+          id: "admin-user",
+        };
+      }
+      return null;
+    },
+    cookiePassword: "ABbfibrirbOEUFBkbfrbHjahsj",
+    cookieName: "theschoolofoptions-admin-session",
+  });
+
+  adminJs.watch();
+  return { router, adminJs };
 };
