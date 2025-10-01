@@ -28,9 +28,10 @@ async function setupAdmin(port: number) {
       res.send(`
         <h1>The School of Options Admin Service</h1>
         <p>Visit <a href="/admin">/admin</a> for the Admin Panel.</p>
-        <p>Login with email: hello@theschoolofoptions.com</p>
         <hr>
-        <small>Authentication is enabled. You will be redirected to login if not authenticated.</small>
+        <p><strong>🔐 AWS Cognito Authentication Enabled</strong></p>
+        <p>Only users in the <strong>Super-Admin</strong> group can access this admin panel.</p>
+        <small>You will be redirected to login if not authenticated.</small>
       `);
     });
 
@@ -38,7 +39,7 @@ async function setupAdmin(port: number) {
       console.log(
         `AdminJS started on http://localhost:${port}${adminJs.options.rootPath}`
       );
-      console.log(`Login with email: hello@theschoolofoptions.com`);
+      console.log(`🔐 AWS Cognito Authentication: Only Super-Admin group members can login`);
     });
   } catch (error) {
     console.error("Failed to setup admin:", error);
