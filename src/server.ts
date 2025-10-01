@@ -1,7 +1,7 @@
 import express from "express";
 import path from "path";
 import dotenv from "dotenv";
-import { initDB, AppDataSource } from "./config/database.js";
+import { initDB } from "./config/database.js";
 import { RegisterAdminJS } from "./config/admin.config.js";
 
 dotenv.config();
