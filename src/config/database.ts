@@ -10,9 +10,7 @@ dotenv.config();
 const ssl =
   process.env.DB_SSL === "false"
     ? undefined
-    : // For RDS: you can start with rejectUnauthorized:false.
-      // Later, switch to proper CA bundle for stronger security.
-      { rejectUnauthorized: false };
+    : { rejectUnauthorized: false };
 
 export const AppDataSource = new DataSource({
   type: "postgres",
