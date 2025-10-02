@@ -76,45 +76,55 @@ export const RegisterAdminJS = async () => {
             exportCsv: {
               actionType: "resource",
               icon: "Download",
-              label: "Export to CSV",
-              handler: async (request: any, _response: any, context: any) => {
+              component: false,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              handler: async (_request: any, response: any, context: any) => {
                 const { resource } = context;
 
-                // Get all records based on current filters
-                const { records } = await resource.find(request.query, {
-                  limit: 10000,
-                });
+                try {
+                  const filters = { "filters.role": UserRole.SUPER_ADMIN };
 
-                const webinarRepo = AppDataSource.getRepository(Webinar);
+                  const result = await resource.find(filters, {
+                    limit: 10000,
+                  });
 
-                // Prepare data with webinar enrollment count
-                const csvData = await Promise.all(
-                  records.map(async (record: any) => {
-                    const webinarCount = await webinarRepo.count({
-                      where: { email: record.params.email },
-                    });
+                  const webinarRepo = AppDataSource.getRepository(Webinar);
 
-                    return {
-                      fullName: record.params.fullName,
-                      email: record.params.email,
-                      createdAt: record.params.createdAt,
-                      webinarEnrolled: webinarCount,
-                    };
-                  })
-                );
+                  // Prepare data with webinar enrollment count
+                  const csvData = await Promise.all(
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    result.records.map(async (record: any) => {
+                      const webinarCount = await webinarRepo.count({
+                        where: { email: record.params.email },
+                      });
 
-                const parser = new Parser({
-                  fields: ["fullName", "email", "createdAt", "webinarEnrolled"],
-                });
-                const csv = parser.parse(csvData);
+                      return {
+                        "Full Name": record.params.fullName || '',
+                        "Email": record.params.email || '',
+                        "Created At": record.params.createdAt || '',
+                        "Webinars Enrolled": webinarCount,
+                      };
+                    })
+                  );
 
-                return {
-                  headers: {
-                    "Content-Type": "text/csv",
-                    "Content-Disposition": `attachment; filename=super-admin-users-${new Date().toISOString().split('T')[0]}.csv`,
-                  },
-                  body: csv,
-                };
+                  const parser = new Parser({
+                    fields: ["Full Name", "Email", "Created At", "Webinars Enrolled"],
+                  });
+                  const csv = parser.parse(csvData);
+
+                  response.setHeader('Content-Type', 'text/csv');
+                  response.setHeader('Content-Disposition', `attachment; filename="super-admin-users-${new Date().toISOString().split('T')[0]}.csv"`);
+
+                  return response.send(csv);
+                } catch (error) {
+                  console.error("Error exporting CSV:", error);
+                  return {
+                    notice: {
+                      message: 'Error exporting CSV file',
+                      type: 'error',
+                    },
+                  };
+                }
               },
             },
             new: { isAccessible: true },
@@ -140,14 +150,17 @@ export const RegisterAdminJS = async () => {
               isVisible: { list: true, filter: true, show: true, edit: true },
               position: 2,
             },
-              mobileNumber: { isVisible: true },
+            mobileNumber: { 
+              isVisible: { list: true, filter: true, show: true, edit: true },
+              position: 3,
+            },
             createdAt: {
               isVisible: { list: true, filter: true, show: true, edit: false },
-              position: 3,
+              position: 4,
             },
             role: {
               isVisible: { list: true, filter: true, show: true, edit: true },
-              position: 4,
+              position: 5,
               availableValues: [
                 { value: UserRole.SUPER_ADMIN, label: "Super-Admin" },
                 { value: UserRole.USER, label: "User" },
@@ -163,7 +176,7 @@ export const RegisterAdminJS = async () => {
             loginCount: { isVisible: { list: false, filter: false, show: true, edit: false } },
             updatedAt: { isVisible: { list: false, filter: false, show: true, edit: false } },
           },
-          listProperties: ["fullName", "email", "createdAt", "role"],
+          listProperties: ["fullName", "email", "mobileNumber", "createdAt", "role"],
           filterProperties: ["fullName", "email", "role", "createdAt", "isVerified", "isActive"],
           actions: {
             list: {
@@ -179,46 +192,56 @@ export const RegisterAdminJS = async () => {
             exportCsv: {
               actionType: "resource",
               icon: "Download",
-              label: "Export to CSV",
-              handler: async (request: any, _response: any, context: any) => {
+              component: false,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              handler: async (_request: any, response: any, context: any) => {
                 const { resource } = context;
 
-                // Get all records based on current filters
-                const { records } = await resource.find(request.query, {
-                  limit: 10000,
-                });
+                try {
+                  const filters = { "filters.role": UserRole.USER };
 
-                const webinarRepo = AppDataSource.getRepository(Webinar);
+                  const result = await resource.find(filters, {
+                    limit: 10000,
+                  });
 
-                // Prepare data with webinar enrollment count
-                const csvData = await Promise.all(
-                  records.map(async (record: any) => {
-                    const webinarCount = await webinarRepo.count({
-                      where: { email: record.params.email },
-                    });
+                  const webinarRepo = AppDataSource.getRepository(Webinar);
 
-                    return {
-                      fullName: record.params.fullName,
-                      email: record.params.email,
-                      createdAt: record.params.createdAt,
-                      mobileNumber: record.params.mobileNumber,
-                      webinarEnrolled: webinarCount,
-                    };
-                  })
-                );
+                  // Prepare data with webinar enrollment count
+                  const csvData = await Promise.all(
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    result.records.map(async (record: any) => {
+                      const webinarCount = await webinarRepo.count({
+                        where: { email: record.params.email },
+                      });
 
-                const parser = new Parser({
-                  fields: ["fullName", "email", "createdAt", "mobileNumber", "webinarEnrolled"],
-                });
-                const csv = parser.parse(csvData);
+                      return {
+                        "Full Name": record.params.fullName || '',
+                        "Email": record.params.email || '',
+                        "Mobile Number": record.params.mobileNumber || '',
+                        "Created At": record.params.createdAt || '',
+                        "Webinars Enrolled": webinarCount,
+                      };
+                    })
+                  );
 
-                return {
-                  headers: {
-                    "Content-Type": "text/csv",
-                    "Content-Disposition": `attachment; filename=users-${new Date().toISOString().split('T')[0]}.csv`,
-                  },
-                  body: csv,
-                };
+                  const parser = new Parser({
+                    fields: ["Full Name", "Email", "Mobile Number", "Created At", "Webinars Enrolled"],
+                  });
+                  const csv = parser.parse(csvData);
+
+                  response.setHeader('Content-Type', 'text/csv');
+                  response.setHeader('Content-Disposition', `attachment; filename="users-${new Date().toISOString().split('T')[0]}.csv"`);
+
+                  return response.send(csv);
+                } catch (error) {
+                  console.error("Error exporting CSV:", error);
+                  return {
+                    notice: {
+                      message: 'Error exporting CSV file',
+                      type: 'error',
+                    },
+                  };
+                }
               },
             },
             new: { isAccessible: true },

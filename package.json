@@ -16,6 +16,7 @@
   "dependencies": {
     "@adminjs/design-system": "^4.1.1",
     "@adminjs/express": "^6.1.1",
+    "@adminjs/import-export": "^4.1.0",
     "@adminjs/mongoose": "^4.1.0",
     "@adminjs/typeorm": "^5.0.1",
     "@aws-sdk/client-cognito-identity-provider": "^3.899.0",
