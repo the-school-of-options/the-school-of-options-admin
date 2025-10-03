@@ -5,13 +5,8 @@ import { User, UserRole } from "../entities/user.entity.js";
 import { AppDataSource } from "./database.js";
 import { Webinar } from "../entities/webinar.entity.js";
 import { authenticateWithCognito } from "../services/cognito-auth.service.js";
-import { Parser } from "json2csv";
 import { ComponentLoader } from "adminjs";
-import path from "path";
-import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export const RegisterAdminJS = async () => {
   // Register the adapter BEFORE creating AdminJS instance
@@ -88,7 +83,7 @@ export const RegisterAdminJS = async () => {
               label: "Export CSV",
               isVisible: true,
               component: false,
-              handler: async (request: any, response: any, context: any) => {
+              handler: async () => {
                 // Redirect to the direct download endpoint
                 const exportUrl = '/admin/export/super-admins';
                 
@@ -239,7 +234,7 @@ export const RegisterAdminJS = async () => {
               label: "Export CSV",
               isVisible: true,
               component: false,
-              handler: async (request: any, response: any, context: any) => {
+              handler: async () => {
                 // Redirect to the direct download endpoint
                 const exportUrl = '/admin/export/users';
                 
@@ -372,7 +367,7 @@ export const RegisterAdminJS = async () => {
               label: "Export CSV",
               isVisible: true,
               component: false,
-              handler: async (request: any, response: any, context: any) => {
+              handler: async () => {
                 // Redirect to the direct download endpoint
                 const exportUrl = '/admin/export/webinars';
                 

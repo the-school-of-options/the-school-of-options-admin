@@ -30,7 +30,7 @@ async function setupAdmin(port: number) {
     // ============================================
     
     // Export Super Admin Users
-    app.get("/admin/export/super-admins", async (req, res) => {
+    app.get("/admin/export/super-admins", async (_req, res) => {
       try {
         const userRepo = AppDataSource.getRepository(User);
         const webinarRepo = AppDataSource.getRepository(Webinar);
@@ -84,7 +84,7 @@ async function setupAdmin(port: number) {
     });
 
     // Export Regular Users
-    app.get("/admin/export/users", async (req, res) => {
+    app.get("/admin/export/users", async (_req, res) => {
       try {
         const userRepo = AppDataSource.getRepository(User);
         const webinarRepo = AppDataSource.getRepository(Webinar);
@@ -139,7 +139,7 @@ async function setupAdmin(port: number) {
     });
 
     // Export Webinars
-    app.get("/admin/export/webinars", async (req, res) => {
+    app.get("/admin/export/webinars", async (_req, res) => {
       try {
         const webinarRepo = AppDataSource.getRepository(Webinar);
 
