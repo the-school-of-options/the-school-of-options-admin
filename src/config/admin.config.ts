@@ -80,7 +80,7 @@ export const RegisterAdminJS = async () => {
               label: "Export CSV",
               isVisible: true,
               component: false,
-              handler: async (request: any, response: any, context: any) => {
+              handler: async (_request: any, response: any) => {
                 try {
                   const userRepo = AppDataSource.getRepository(User);
                   const webinarRepo = AppDataSource.getRepository(Webinar);
@@ -209,7 +209,7 @@ export const RegisterAdminJS = async () => {
               label: "Export CSV",
               isVisible: true,
               component: false,
-              handler: async (request: any, response: any, context: any) => {
+              handler: async (_request: any, response: any) => {
                 try {
                   const userRepo = AppDataSource.getRepository(User);
                   const webinarRepo = AppDataSource.getRepository(Webinar);
@@ -321,7 +321,7 @@ export const RegisterAdminJS = async () => {
               label: "Export CSV",
               isVisible: true,
               component: false,
-              handler: async (request: any, response: any, context: any) => {
+              handler: async (_request: any, response: any) => {
                 try {
                   const webinarRepo = AppDataSource.getRepository(Webinar);
 
