@@ -9,16 +9,12 @@ import {
   BeforeUpdate,
   Check,
   BaseEntity,
-  EventSubscriber,
-  EntitySubscriberInterface,
 } from "typeorm";
 
 export enum UserRole {
- SUPER_ADMIN = "Super-Admin",
+  SUPER_ADMIN = "Super-Admin",
   USER = "User",
 }
-
-
 
 @Check("CHK_user_fullname_len", 'char_length("fullName") <= 100')
 @Entity({ name: "users" })
@@ -35,7 +31,11 @@ export class User extends BaseEntity {
   email!: string;
 
   @Column({ type: "varchar", length: 100 })
-  fullName: string;
+  fullName!: string;
+
+  @Index()
+  @Column({ type: "varchar", length: 20, nullable: true })
+  mobileNumber!: string | null;
 
   @Index()
   @Column({ type: "varchar", length: 128, nullable: true })
@@ -51,10 +51,6 @@ export class User extends BaseEntity {
     default: UserRole.USER,
   })
   role!: UserRole;
-
-
-
-
 
   @Column({ type: "boolean", default: false })
   isVerified!: boolean;
@@ -74,23 +70,13 @@ export class User extends BaseEntity {
   @UpdateDateColumn({ type: "timestamptz" })
   updatedAt!: Date;
 
-  @Index()
-  @Column({ type: "varchar", length: 20, nullable: true })
-  mobileNumber!: string | null;
-
   @BeforeInsert()
   @BeforeUpdate()
   normalize() {
     if (this.email) this.email = this.email.trim().toLowerCase();
     if (this.fullName) this.fullName = this.fullName.trim();
-  }
-
-
-}
-
-@EventSubscriber()
-export class UserSubscriber implements EntitySubscriberInterface<User> {
-  listenTo() {
-    return User;
+    if (this.mobileNumber) this.mobileNumber = this.mobileNumber.trim();
   }
 }
+
+export default User;

@@ -25,8 +25,8 @@ export class Webinar extends BaseEntity {
   @Column({ type: "varchar", length: 2083, nullable: true })
   webinarLink!: string | null;
 
-  // @Column({ type: "varchar", length: 50, nullable: true })
-  // phoneNumber!: string | null;
+  @Column({ type: "varchar", length: 50, nullable: true })
+  phoneNumber!: string | null;
 
   @Column({ type: "varchar", length: 100, nullable: true })
   source!: string | null;
